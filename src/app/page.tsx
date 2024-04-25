@@ -1,95 +1,56 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import React from 'react';
+import { searchNull, shuffle, isMovable, initialPieces, minSteps, minStepColor } from './utilities';
+import { Box, Button, HStack, Stack, Text } from '@chakra-ui/react';
 
 export default function Home() {
+  const [pieces, setPieces] = React.useState(initialPieces);
+  const [counter, setCounter] = React.useState(0);
+
+  const handleClick = (rowIndex: number, colIndex: number) => {
+    const nullPos = searchNull(pieces);
+    const newPieces = [...pieces];
+    newPieces[nullPos[0]][nullPos[1]] = pieces[rowIndex][colIndex];
+    newPieces[rowIndex][colIndex] = null;
+    setPieces(newPieces);
+    setCounter(counter + 1);
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    <>
+      <Stack spacing={4} alignContent='center' justifyContent='center' alignItems='center'>
+        <HStack justifyContent='center' alignItems='center'>
+          <div className="grid">
+            {pieces.map((block: (number | null)[], rowIndex: number) => (
+              block.map((piece: number | null, colIndex: number) => (
+                <Button
+                  key={String(piece)}
+                  isDisabled={!isMovable(pieces, rowIndex, colIndex)}
+                  className="piece"
+                  onClick={() => { handleClick(rowIndex, colIndex) }}
+                  style={{ width: '80px', height: '80px' }}
+                  colorScheme='gray'>
+                  {piece}
+                </Button>
+              ))
+            )
+            )}
+          </div>
+          <Stack>
+            <Box p={4} color="white" bg="blackAlpha.500" rounded="md" shadow="md" maxW="240px">
+              <Text fontSize="xl" fontWeight="bold">Counter: {counter}</Text>
+            </Box>
+            <Box mt={4} p={4} color="white" bg={minStepColor(minSteps(pieces))+".500"} rounded="md" shadow="md" maxW="240px">
+              <Text fontSize="xl" fontWeight="bold">Min Steps: {minSteps(pieces)}</Text>
+            </Box>
+          </Stack>
+        </HStack>
+        <div><Button
+          className="shuffle"
+          onClick={() => { setPieces(shuffle(pieces)); setCounter(0) }}
+          colorScheme='teal'>shuffle!</Button></div>
+      </Stack>
+    </>
+  )
 }
