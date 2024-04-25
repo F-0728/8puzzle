@@ -17,6 +17,8 @@ export default function Home() {
     setCounter(counter + 1);
   };
 
+  const currentMinSteps = minSteps(pieces);
+
   return (
     <>
       <Stack spacing={4} alignContent='center' justifyContent='center' alignItems='center'>
@@ -41,8 +43,8 @@ export default function Home() {
             <Box p={4} color="white" bg="blackAlpha.500" rounded="md" shadow="md" maxW="240px">
               <Text fontSize="xl" fontWeight="bold">Counter: {counter}</Text>
             </Box>
-            <Box mt={4} p={4} color="white" bg={minStepColor(minSteps(pieces))+".500"} rounded="md" shadow="md" maxW="240px">
-              <Text fontSize="xl" fontWeight="bold">Min Steps: {minSteps(pieces)}</Text>
+            <Box mt={4} p={4} color="white" bg={minStepColor(currentMinSteps)+".500"} rounded="md" shadow="md" maxW="240px">
+              <Text fontSize="xl" fontWeight="bold">Min Steps: {currentMinSteps}</Text>
             </Box>
           </Stack>
         </HStack>
