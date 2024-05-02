@@ -1,3 +1,5 @@
+import { PriorityQueue } from "./PQueue";
+
 export const searchNull = (pieces: (number | null)[][]) => {
     let nullPos = [-1, -1];
     for (let i = 0; i < pieces.length; i++) {
@@ -61,11 +63,11 @@ export const heuristic = (pieces: (number | null)[][]) => {
 
 export const minSteps = (pieces: (number | null)[][]) => {
     const visited = new Set<string>();
-    let queue: { pieces: (number | null)[][], moves: number, h: number }[] = [{ pieces, moves: 0, h: heuristic(pieces) }];
+    let pqueue: PriorityQueue["queue"] = [{ pieces: pieces, moves: 0, h: heuristic(pieces) }];
 
-    while (queue.length > 0) {
-        const current = queue.reduce((min, obj) => (obj.moves + obj.h) < (min.moves + min.h) ? obj : min, queue[0]);
-        queue = queue.filter(obj => obj !== current);
+    while (pqueue.length > 0) {
+        const current = pqueue[0];
+        pqueue.pop();
         const key = current.pieces.map(row => row.join('.')).join('/');
 
         if (visited.has(key)) {
@@ -86,9 +88,9 @@ export const minSteps = (pieces: (number | null)[][]) => {
                 const newPieces = JSON.parse(JSON.stringify(current.pieces));
                 newPieces[nullPos[0]][nullPos[1]] = newPieces[x][y];
                 newPieces[x][y] = null;
-                const newKey = newPieces.map((row: number[]) => row.join('')).join('/');
+                const newKey = newPieces.map((row: number[]) => row.join('.')).join('/');
                 if (!visited.has(newKey)) {
-                    queue.push({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
+                    pqueue.push({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
                 }
             }
         }
