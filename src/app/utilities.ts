@@ -1,5 +1,3 @@
-import { PriorityQueue } from "./PQueue";
-
 export const searchNull = (pieces: (number | null)[][]) => {
     let nullPos = [-1, -1];
     for (let i = 0; i < pieces.length; i++) {
@@ -53,6 +51,9 @@ export const heuristic = (pieces: (number | null)[][]) => {
     let h = 0;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
+            if (pieces[i][j] === null) {
+                continue;
+            }
             const targetRow = Math.floor((pieces[i][j] ?? 0) / 3);
             const targetCol = (pieces[i][j] ?? 0) % 3;
             h += Math.abs(i - targetRow) + Math.abs(j - targetCol);
@@ -63,11 +64,11 @@ export const heuristic = (pieces: (number | null)[][]) => {
 
 export const minSteps = (pieces: (number | null)[][]) => {
     const visited = new Set<string>();
-    let pqueue: PriorityQueue["queue"] = [{ pieces: pieces, moves: 0, h: heuristic(pieces) }];
+    let queue: { pieces: (number | null)[][], moves: number, h: number }[] = [{ pieces, moves: 0, h: heuristic(pieces) }];
 
-    while (pqueue.length > 0) {
-        const current = pqueue[0];
-        pqueue.pop();
+    while (queue.length > 0) {
+        const current = queue.reduce((min, obj) => (obj.moves + obj.h) < (min.moves + min.h) ? obj : min, queue[0]);
+        queue = queue.filter(obj => obj !== current);
         const key = current.pieces.map(row => row.join('.')).join('/');
 
         if (visited.has(key)) {
@@ -88,9 +89,9 @@ export const minSteps = (pieces: (number | null)[][]) => {
                 const newPieces = JSON.parse(JSON.stringify(current.pieces));
                 newPieces[nullPos[0]][nullPos[1]] = newPieces[x][y];
                 newPieces[x][y] = null;
-                const newKey = newPieces.map((row: number[]) => row.join('.')).join('/');
+                const newKey = newPieces.map((row: number[]) => row.join('')).join('/');
                 if (!visited.has(newKey)) {
-                    pqueue.push({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
+                    queue.push({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
                 }
             }
         }
