@@ -1,3 +1,11 @@
+import PriorityQueue from "priority-queue-typescript";
+
+export interface PriorityQueueNode {
+    pieces: (number | null)[][],
+    moves: number,
+    h: number,
+}
+
 export const searchNull = (pieces: (number | null)[][]) => {
     let nullPos = [-1, -1];
     for (let i = 0; i < pieces.length; i++) {
@@ -13,8 +21,9 @@ export const searchNull = (pieces: (number | null)[][]) => {
 export const initialPieces = [[null, 1, 2], [3, 4, 5], [6, 7, 8]];
 
 export const shuffle = (pieces: (number | null)[][]) => {
-    const newPieces = [...pieces];
-    for (let i = 0; i < 100; i++) {
+    const shuffleMoves = Math.floor(Math.random() * 1000);
+    const newPieces = JSON.parse(JSON.stringify(pieces));
+    for (let i = 0; i < shuffleMoves; i++) {
         const nullPos = searchNull(newPieces);
         const movable = [];
         if (nullPos[0] !== 0) {
@@ -64,12 +73,18 @@ export const heuristic = (pieces: (number | null)[][]) => {
 
 export const minSteps = (pieces: (number | null)[][]) => {
     const visited = new Set<string>();
-    let queue: { pieces: (number | null)[][], moves: number, h: number }[] = [{ pieces, moves: 0, h: heuristic(pieces) }];
+    const queue = new PriorityQueue<PriorityQueueNode>(
+        1000000000,
+        (a: PriorityQueueNode, b: PriorityQueueNode) => a.moves + a.h - b.moves - b.h
+    );
+    queue.add({ pieces, moves: 0, h: heuristic(pieces) });
 
-    while (queue.length > 0) {
-        const current = queue.reduce((min, obj) => (obj.moves + obj.h) < (min.moves + min.h) ? obj : min, queue[0]);
-        queue = queue.filter(obj => obj !== current);
-        const key = current.pieces.map(row => row.join('.')).join('/');
+    while (queue.size() > 0) {
+        const current = queue.poll();
+        if (!current) {
+            break;
+        }
+        const key = current.pieces.map((row: (number | null)[]) => row.join('.')).join('/');
 
         if (visited.has(key)) {
             continue;
@@ -91,7 +106,7 @@ export const minSteps = (pieces: (number | null)[][]) => {
                 newPieces[x][y] = null;
                 const newKey = newPieces.map((row: number[]) => row.join('')).join('/');
                 if (!visited.has(newKey)) {
-                    queue.push({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
+                    queue.add({ pieces: newPieces, moves: current.moves + 1, h: heuristic(newPieces) });
                 }
             }
         }
