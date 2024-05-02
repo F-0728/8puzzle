@@ -51,6 +51,9 @@ export const heuristic = (pieces: (number | null)[][]) => {
     let h = 0;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
+            if (pieces[i][j] === null) {
+                continue;
+            }
             const targetRow = Math.floor((pieces[i][j] ?? 0) / 3);
             const targetCol = (pieces[i][j] ?? 0) % 3;
             h += Math.abs(i - targetRow) + Math.abs(j - targetCol);
